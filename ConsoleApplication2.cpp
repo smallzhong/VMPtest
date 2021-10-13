@@ -6,23 +6,23 @@
 #pragma comment(lib, "../capstone-4.0.2-win32/capstone_dll.lib")
 SEG_MAP segs[] = {
 	//base			size			file name
-	{0x00404000,	0x8c000,		"sample.vmp_00404000.bin",				NULL},
-	{0x0019B000,	0x5000,			"sample.vmp_0019B000.bin",				NULL},
-	{0x00403000,	0x1000,			"sample.vmp_00403000.bin",				NULL},
+	{0x0041e000,	0x8d000,		"MEM_0041E000_0008D000.mem",				NULL},
+	{0x0019B000,	0x5000,			"MEM_0019B000_00002000.mem",				NULL}/*,
+	{0x00403000,	0x1000,			"sample.vmp_00403000.bin",				NULL},*/
 
 };
 
 
-#define INIT_EAX			0x00000001
-#define INIT_EBX			0x00000000
-#define INIT_ECX			0x75105AA0
-#define INIT_EDX			0x751545D0
-#define INIT_EBP			0x0019FF70
-#define INIT_ESP			0x0019FF20
-#define INIT_ESI			0x75105584
-#define INIT_EDI			0x75105AD4
-#define INIT_EIP			0x00424596
-#define INIT_EFL			0x00000206
+#define INIT_EAX			0x004D5C48
+#define INIT_EBX			0x00321000
+#define INIT_ECX			0x00000001
+#define INIT_EDX			0x004D5370
+#define INIT_EBP			0x0019FF04
+#define INIT_ESP			0x0019FEE8
+#define INIT_ESI			0x00411023
+#define INIT_EDI			0x00411023
+#define INIT_EIP			0x0042e093
+#define INIT_EFL			0x00000202
 
 uc_engine* uc;
 
@@ -173,7 +173,7 @@ int main(int argc, char** argv, char** envp)
 				err, uc_strerror(err));
 			print_regs();
 			print_stack(regs.regs.r_esp);
-			__asm int 3
+			//__asm int 3
 			break;
 		}
 		read_regs();
