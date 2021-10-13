@@ -1,0 +1,14 @@
+﻿  ConsoleApplication2.cpp
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(38,10): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(71,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(72,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(73,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(74,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(75,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(76,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(77,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(78,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(79,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+C:\Users\22112\source\repos\ConsoleApplication2\ConsoleApplication2\ConsoleApplication2.cpp(80,9): warning C4477: “printf”: 格式字符串“%p”需要类型“void *”的参数，但可变参数 1 拥有了类型“DWORD”
+ConsoleApplication2.obj : warning LNK4075: 忽略“/EDITANDCONTINUE”(由于“/INCREMENTAL:NO”规范)
+  ConsoleApplication2.vcxproj -> C:\Users\22112\source\repos\ConsoleApplication2\Debug\ConsoleApplication2.exe
