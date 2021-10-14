@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <map>
+#include <time.h>
 
 #include "emu.h"
 #pragma comment(lib, "../unicorn.lib")
@@ -32,8 +33,7 @@ SEG_MAP segs[] = {
 uc_engine* uc;
 
 REGS regs;
-
-int test(char t, int &count);
+DWORD total_ct;
 
 void print_stack(DWORD esp)
 {
@@ -86,158 +86,11 @@ void print_regs() {
 	printf("efl = %p\n", regs.regs.r_efl);
 }
 
-int test2()
-{
-	regs.regs.r_eax = INIT_EAX;
-	regs.regs.r_ecx = INIT_ECX;
-	regs.regs.r_edx = INIT_EDX;
-	regs.regs.r_ebx = INIT_EBX;
-	regs.regs.r_esp = INIT_ESP;
-	regs.regs.r_ebp = INIT_EBP;
-	regs.regs.r_esi = INIT_ESI;
-	regs.regs.r_edi = INIT_EDI;
-	regs.regs.r_eip = INIT_EIP;
-	regs.regs.r_efl = INIT_EFL;
-
-	uc_err err;
-	csh handle;
-	cs_insn* insn;
-
-	//printf("Emulate i386 code\n");
-
-	// Initialize emulator in X86-32bit mode
-	err = uc_open(UC_ARCH_X86, UC_MODE_32, &uc);
-	if (err != UC_ERR_OK) {
-		printf("Failed on uc_open() with error returned: %u\n", err);
-		return -1;
-	}
-
-	for (int i = 0; i < sizeof(segs) / sizeof(SEG_MAP); i++) {
-		segs[i].buf = (unsigned char*)malloc(segs[i].size);
-		FILE* fp = fopen(segs[i].file_name, "rb");
-		fread(segs[i].buf, segs[i].size, 1, fp);
-		fclose(fp);
-		// map memory for this emulation
-		err = uc_mem_map(uc, segs[i].base, segs[i].size, UC_PROT_ALL);
-		// write machine code to be emulated to memory
-		err = uc_mem_write(uc, segs[i].base, segs[i].buf, segs[i].size);
-		free(segs[i].buf);
-	}
-
-	if (cs_open(CS_ARCH_X86, CS_MODE_32, &handle)) {
-		printf("ERROR: Failed to initialize engine!\n");
-		return -1;
-	}
-	cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
-
-	write_regs();
-	init_gdt(uc);
-
-	CHAR aaa[] = "D5077026F59BB5A1A20F04D08888402D";
-
-	uc_mem_write(uc, STRING_ADDR, aaa, sizeof aaa);
-
-
-	BYTE code[32];
-	int count = 0;
-	// emulate code in infinite time & unlimited instructions
-	while (1) {
-		count++;
-		uc_mem_read(uc, regs.regs.r_eip, code, 32);
-		cs_disasm(handle, code, 32, regs.regs.r_eip, 1, &insn);
-
-		switch (regs.regs.r_eip)
-		{
-
-		case 0:
-			goto DEFAULT;
-		DEFAULT:
-		default:
-		{	/*DWORD val;
-			uc_mem_read(uc, 0x12f468, &val, 4);*/
-			if ( /*is_reg_tainted(X86_REG_EBP)*/
-				//regs.regs.r_ebp == INIT_EBP
-				//&& !strcmp(insn->mnemonic, "ret")
-				//&& is_reg_tainted(X86_REG_EDI)
-				//is_addr_tainted(0x662dc3)
-				//0
-				//count == 4118
-				0)
-			{
-				print_regs();
-				//print_taint_reg();
-				//print_taint_addr();
-				print_stack(regs.regs.r_esp);
-			}
-			//if (do_taint(insn))
-			//{
-			//	//printf("%p\t%s %s\n", regs.regs.r_eip, insn->mnemonic, insn->op_str);
-			//	//print_taint_reg();
-			//}
-		}
-		}
-
-		err = uc_emu_start(uc, regs.regs.r_eip, 0xffffffff, 0, 1);
-		if (err) {
-			//printf("Exception with error returned %u: %s\n", err, uc_strerror(err));
-			//print_regs();
-			//print_stack(regs.regs.r_esp);
-			//__asm int 3
-			break;
-		}
-		read_regs();
-
-		cs_free(insn, 1);
-
-	}
-	printf("count = %d\n", count);
-
-	cs_close(&handle);
-	uc_close(uc);
-
-	//system("pause");
-	return 0;
-}
-
 CHAR answer[1024];
 INT cur = 0;
+clock_t start, ed;
 
-int main()
-{
-	std::unordered_map<int, std::pair<int, int>> m;
-	for (int i = 0x41; i <= 0x5a; i++)
-	{
-		int count = 0;
-		test(i, count);
-		m[count].first++;
-		m[count].second = i;
-
-		system("cls");
-		printf("当前答案为%s\n", answer);
-		puts("");
-		for (auto i : m)
-		{
-			printf("count = %d 出现次数 = %d\n", i.first, i.second.first);
-		}
-	}
-
-	if (m.size() != 2) puts("错误！count不等于2！");
-	else
-	{
-		for (auto i : m)
-			if (i.second.first == 1) 
-			{
-				answer[cur ++ ] = i.second.second;
-				break;
-			}
-	}
-
-
-	//test2();
-}
-
-
-int test(char t, int& count)
+int test(int& count)
 {
 	regs.regs.r_eax = INIT_EAX;
 	regs.regs.r_ecx = INIT_ECX;
@@ -284,21 +137,13 @@ int test(char t, int& count)
 	write_regs();
 	init_gdt(uc);
 
-	CHAR temp[1024];
-	memset(temp, 0, sizeof temp);
-
-	for (int i = 0; i < t; i++)
-	{
-		temp[i] = i;
-	}
-	uc_mem_write(uc, STRING_ADDR, &t, 1);
-
-	uc_mem_read(uc, STRING_ADDR, &temp, sizeof temp);
+	uc_mem_write(uc, STRING_ADDR, answer, (sizeof(DWORD) * (cur + 1)));
 
 	BYTE code[32];
 	/*int count = 0;*/
 	// emulate code in infinite time & unlimited instructions
 	while (1) {
+		total_ct++;
 		count++;
 		uc_mem_read(uc, regs.regs.r_eip, code, 32);
 		cs_disasm(handle, code, 32, regs.regs.r_eip, 1, &insn);
@@ -355,3 +200,56 @@ int test(char t, int& count)
 	//system("pause");
 	return 0;
 }
+
+int main()
+{
+	start = clock();
+	std::unordered_map<int, std::pair<int, int>> m;
+
+	for (int T = 0; T < 33; T++)
+	{
+		m.clear();
+		for (int i = /*0x30*/0x44; i <= /*0x5a*/0x46; i++)
+		{
+			if (i == 0x3a) i = 0x41;
+
+			int count = 0;
+
+			answer[cur] = i;
+			test(count);
+			m[count].first++;
+			m[count].second = i;
+
+			system("cls");
+			printf("当前答案为%s\n", answer);
+			puts("");
+			for (auto i : m)
+			{
+				printf("count = %d 出现次数 = %d\n", i.first, i.second.first);
+			}
+			printf("总运行指令条数%d\n", total_ct);
+			ed = clock();
+			double duration = (double)(ed - start) / CLOCKS_PER_SEC;
+			printf("\n总运行时间%lf秒\n", duration);
+		}
+
+		if (m.size() != 2) puts("错误！count不等于2！");
+		else
+		{
+			for (auto i : m)
+				if (i.second.first == 1)
+				{
+					answer[cur++] = i.second.second;
+					break;
+				}
+		}
+	}
+	printf("\n答案为%s\n", answer);
+	printf("总运行指令条数%d\n\n", total_ct);
+	ed = clock();
+	double duration = (double)(ed - start) / CLOCKS_PER_SEC;
+	printf("总运行时间%lf秒\n", duration);
+
+	//test2();
+}
+
