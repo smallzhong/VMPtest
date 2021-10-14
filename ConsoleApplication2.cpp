@@ -1,33 +1,39 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
+#include <unordered_map>
+#include <map>
 
 #include "emu.h"
 #pragma comment(lib, "../unicorn.lib")
 #pragma comment(lib, "../capstone-4.0.2-win32/capstone_dll.lib")
 SEG_MAP segs[] = {
 	//base			size			file name
-	{0x0041e000,	0x8d000,		"MEM_0041E000_0008D000.mem",				NULL},
-	{0x0019B000,	0x5000,			"MEM_0019B000_00002000.mem",				NULL}/*,
-	{0x00403000,	0x1000,			"sample.vmp_00403000.bin",				NULL},*/
+	{0x0019B000,	0x5000,			"MEM_0019B000_00005000.mem",				NULL},
+	{0x00402000,	0x1000,		    "MEM_00402000_00001000.mem",				NULL},
+	{0x00403000,	0x1000,			"MEM_00403000_00001000.mem",				NULL},
+	{0x00404000,	0x0008F000,		"MEM_00404000_0008F000.mem",				NULL},
 
 };
 
 
-#define INIT_EAX			0x004D5C48
-#define INIT_EBX			0x00321000
-#define INIT_ECX			0x00000001
-#define INIT_EDX			0x004D5370
-#define INIT_EBP			0x0019FF04
-#define INIT_ESP			0x0019FEE8
-#define INIT_ESI			0x00411023
-#define INIT_EDI			0x00411023
-#define INIT_EIP			0x0042e093
-#define INIT_EFL			0x00000202
+#define INIT_EAX			0x01
+#define INIT_EBX			0x003C4000
+#define INIT_ECX			0x61004CD7
+#define INIT_EDX			1
+#define INIT_EBP			0x0019FF70
+#define INIT_ESP			0x0019FF18
+#define INIT_ESI			0x768848D0
+#define INIT_EDI			0x005F9328
+#define INIT_EIP			0x004282c8
+#define INIT_EFL			0x216
+
+#define STRING_ADDR			0x403378
 
 uc_engine* uc;
 
 REGS regs;
 
+int test(char t, int &count);
 
 void print_stack(DWORD esp)
 {
@@ -80,8 +86,7 @@ void print_regs() {
 	printf("efl = %p\n", regs.regs.r_efl);
 }
 
-
-int main(int argc, char** argv, char** envp)
+int test2()
 {
 	regs.regs.r_eax = INIT_EAX;
 	regs.regs.r_ecx = INIT_ECX;
@@ -98,7 +103,7 @@ int main(int argc, char** argv, char** envp)
 	csh handle;
 	cs_insn* insn;
 
-	printf("Emulate i386 code\n");
+	//printf("Emulate i386 code\n");
 
 	// Initialize emulator in X86-32bit mode
 	err = uc_open(UC_ARCH_X86, UC_MODE_32, &uc);
@@ -127,6 +132,11 @@ int main(int argc, char** argv, char** envp)
 
 	write_regs();
 	init_gdt(uc);
+
+	CHAR aaa[] = "D5077026F59BB5A1A20F04D08888402D";
+
+	uc_mem_write(uc, STRING_ADDR, aaa, sizeof aaa);
+
 
 	BYTE code[32];
 	int count = 0;
@@ -169,10 +179,9 @@ int main(int argc, char** argv, char** envp)
 
 		err = uc_emu_start(uc, regs.regs.r_eip, 0xffffffff, 0, 1);
 		if (err) {
-			printf("Exception with error returned %u: %s\n",
-				err, uc_strerror(err));
-			print_regs();
-			print_stack(regs.regs.r_esp);
+			//printf("Exception with error returned %u: %s\n", err, uc_strerror(err));
+			//print_regs();
+			//print_stack(regs.regs.r_esp);
 			//__asm int 3
 			break;
 		}
@@ -186,6 +195,163 @@ int main(int argc, char** argv, char** envp)
 	cs_close(&handle);
 	uc_close(uc);
 
-	system("pause");
+	//system("pause");
+	return 0;
+}
+
+CHAR answer[1024];
+INT cur = 0;
+
+int main()
+{
+	std::unordered_map<int, std::pair<int, int>> m;
+	for (int i = 0x41; i <= 0x5a; i++)
+	{
+		int count = 0;
+		test(i, count);
+		m[count].first++;
+		m[count].second = i;
+
+		system("cls");
+		printf("当前答案为%s\n", answer);
+		puts("");
+		for (auto i : m)
+		{
+			printf("count = %d 出现次数 = %d\n", i.first, i.second.first);
+		}
+	}
+
+	if (m.size() != 2) puts("错误！count不等于2！");
+	else
+	{
+		for (auto i : m)
+			if (i.second.first == 1) 
+			{
+				answer[cur ++ ] = i.second.second;
+				break;
+			}
+	}
+
+
+	//test2();
+}
+
+
+int test(char t, int& count)
+{
+	regs.regs.r_eax = INIT_EAX;
+	regs.regs.r_ecx = INIT_ECX;
+	regs.regs.r_edx = INIT_EDX;
+	regs.regs.r_ebx = INIT_EBX;
+	regs.regs.r_esp = INIT_ESP;
+	regs.regs.r_ebp = INIT_EBP;
+	regs.regs.r_esi = INIT_ESI;
+	regs.regs.r_edi = INIT_EDI;
+	regs.regs.r_eip = INIT_EIP;
+	regs.regs.r_efl = INIT_EFL;
+
+	uc_err err;
+	csh handle;
+	cs_insn* insn;
+
+	//printf("Emulate i386 code\n");
+
+	// Initialize emulator in X86-32bit mode
+	err = uc_open(UC_ARCH_X86, UC_MODE_32, &uc);
+	if (err != UC_ERR_OK) {
+		printf("Failed on uc_open() with error returned: %u\n", err);
+		return -1;
+	}
+
+	for (int i = 0; i < sizeof(segs) / sizeof(SEG_MAP); i++) {
+		segs[i].buf = (unsigned char*)malloc(segs[i].size);
+		FILE* fp = fopen(segs[i].file_name, "rb");
+		fread(segs[i].buf, segs[i].size, 1, fp);
+		fclose(fp);
+		// map memory for this emulation
+		err = uc_mem_map(uc, segs[i].base, segs[i].size, UC_PROT_ALL);
+		// write machine code to be emulated to memory
+		err = uc_mem_write(uc, segs[i].base, segs[i].buf, segs[i].size);
+		free(segs[i].buf);
+	}
+
+	if (cs_open(CS_ARCH_X86, CS_MODE_32, &handle)) {
+		printf("ERROR: Failed to initialize engine!\n");
+		return -1;
+	}
+	cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
+
+	write_regs();
+	init_gdt(uc);
+
+	CHAR temp[1024];
+	memset(temp, 0, sizeof temp);
+
+	for (int i = 0; i < t; i++)
+	{
+		temp[i] = i;
+	}
+	uc_mem_write(uc, STRING_ADDR, &t, 1);
+
+	uc_mem_read(uc, STRING_ADDR, &temp, sizeof temp);
+
+	BYTE code[32];
+	/*int count = 0;*/
+	// emulate code in infinite time & unlimited instructions
+	while (1) {
+		count++;
+		uc_mem_read(uc, regs.regs.r_eip, code, 32);
+		cs_disasm(handle, code, 32, regs.regs.r_eip, 1, &insn);
+
+		switch (regs.regs.r_eip)
+		{
+
+		case 0:
+			goto DEFAULT;
+		DEFAULT:
+		default:
+		{	/*DWORD val;
+			uc_mem_read(uc, 0x12f468, &val, 4);*/
+			if ( /*is_reg_tainted(X86_REG_EBP)*/
+				//regs.regs.r_ebp == INIT_EBP
+				//&& !strcmp(insn->mnemonic, "ret")
+				//&& is_reg_tainted(X86_REG_EDI)
+				//is_addr_tainted(0x662dc3)
+				//0
+				//count == 4118
+				0)
+			{
+				print_regs();
+				//print_taint_reg();
+				//print_taint_addr();
+				print_stack(regs.regs.r_esp);
+			}
+			//if (do_taint(insn))
+			//{
+			//	//printf("%p\t%s %s\n", regs.regs.r_eip, insn->mnemonic, insn->op_str);
+			//	//print_taint_reg();
+			//}
+		}
+		}
+
+		err = uc_emu_start(uc, regs.regs.r_eip, 0xffffffff, 0, 1);
+		if (err) {
+			//printf("Exception with error returned %u: %s\n", err, uc_strerror(err));
+			//print_regs();
+			//print_stack(regs.regs.r_esp);
+			//__asm int 3
+			break;
+		}
+		read_regs();
+
+		cs_free(insn, 1);
+
+	}
+	//printf("count = %d\n", count);
+
+	cs_close(&handle);
+	uc_close(uc);
+
+	//system("pause");
 	return 0;
 }
