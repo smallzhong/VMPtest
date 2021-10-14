@@ -209,7 +209,7 @@ int main()
 	for (int T = 0; T < 33; T++)
 	{
 		m.clear();
-		for (int i = /*0x30*/0x44; i <= /*0x5a*/0x46; i++)
+		for (int i = 0x30/*0x44*/; i <= 0x5a/*0x46*/; i++)
 		{
 			if (i == 0x3a) i = 0x41;
 
@@ -221,7 +221,7 @@ int main()
 			m[count].second = i;
 
 			system("cls");
-			printf("当前答案为%s\n", answer);
+			printf("当前答案为：%s\n", answer);
 			puts("");
 			for (auto i : m)
 			{
@@ -244,11 +244,13 @@ int main()
 				}
 		}
 	}
-	printf("\n答案为%s\n", answer);
+	printf("\n答案为：%s\n", answer);
 	printf("总运行指令条数%d\n\n", total_ct);
 	ed = clock();
 	double duration = (double)(ed - start) / CLOCKS_PER_SEC;
 	printf("总运行时间%lf秒\n", duration);
+
+	system("pause");
 
 	//test2();
 }
