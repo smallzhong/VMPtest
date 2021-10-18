@@ -231,6 +231,8 @@ int main()
 			ed = clock();
 			double duration = (double)(ed - start) / CLOCKS_PER_SEC;
 			printf("\n总运行时间%lf秒\n", duration);
+
+			if (m.size() == 2 && i >= 0x30 + 3) break; 
 		}
 
 		if (m.size() != 2) puts("错误！count不等于2！");
